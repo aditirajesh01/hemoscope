@@ -1,0 +1,12 @@
+{
+  "rf_macro_f1_mean": 0.4995257804106357,
+  "rf_macro_f1_std": 0.16239740803579508,
+  "rf_accuracy_mean": 0.6533333333333333,
+  "lr_macro_f1_mean": 0.33396115685331373,
+  "n_training_variants": 153,
+  "class_counts": {
+    "mild": 106,
+    "severe": 27,
+    "benign": 20
+  }
+}

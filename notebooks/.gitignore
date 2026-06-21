@@ -1,0 +1,4 @@
+notebooks/data/*.pdb
+notebooks/data/*.fasta
+notebooks/data/*.sto
+notebooks/models/*.pkl

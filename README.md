@@ -88,7 +88,3 @@ App runs at: `http://localhost:5173`
 
 ---
 
-## Course Context
-
-Built for BT266TEB — Healthcare Analytics (Semester VI), VTU-affiliated engineering college.  
-Addresses the research gap: no tool exists combining AlphaFold2 structural interpretation, Indian population frequency data, and a hemoglobin-specific severity classifier in a single clinical interface.

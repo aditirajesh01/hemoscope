@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --teal-300: #1D9E75;
+    --teal-400: #0F6E56;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: #9FE1CB;
+    color: #04342C;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zinc-200 dark:bg-zinc-700 rounded-full;
+  }
+}
+
+@layer components {
+  .severity-severe {
+    @apply bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300 border border-red-200 dark:border-red-800;
+  }
+  .severity-mild {
+    @apply bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800;
+  }
+  .severity-benign {
+    @apply bg-teal-50 text-teal-400 dark:bg-teal-950 dark:text-teal-200 border border-teal-100 dark:border-teal-800;
+  }
+  .severity-unknown {
+    @apply bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700;
+  }
+
+  .card {
+    @apply bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl;
+  }
+
+  .section-label {
+    @apply text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3;
+  }
+
+  .stat-card {
+    @apply bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-4 border border-zinc-100 dark:border-zinc-800;
+  }
+}

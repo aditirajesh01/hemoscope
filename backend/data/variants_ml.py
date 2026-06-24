@@ -1,5 +1,7 @@
 """
-ML-generated variant database — produced by notebooks/05_generate_variants_py.ipynb
+RAW ML output — produced by notebooks/05_generate_variants_py.ipynb
+DO NOT copy this file directly to variants.py. variants.py contains manual
+clinical corrections on top of this output (see its module docstring for details).
 
 Feature pipeline:
   - Sequence: BLOSUM62 + conservation/PSSM/entropy from UniProt globin homologs (Biopython)
@@ -8,7 +10,7 @@ Feature pipeline:
   - Classifier: CalibratedRandomForestClassifier, 5-fold CV macro-F1=0.500±0.162
   - Trained on 153 ClinVar HBB/HBA1 variants
 
-To update: re-run notebooks 01-05 in order, then replace backend/data/variants.py with this file.
+To update: re-run notebooks 01-05, copy output here, then apply clinical corrections to variants.py.
 """
 
 VARIANT_DB = {

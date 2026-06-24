@@ -8,6 +8,16 @@ Feature pipeline:
   - Classifier: CalibratedRandomForestClassifier, 5-fold CV macro-F1=0.500±0.162
   - Trained on 153 ClinVar HBB/HBA1 variants
 
+Known classifier errors (manually corrected in this file):
+  - HBB-Glu6Val (HbS): model predicted "mild" (conf 0.86); corrected to "severe" — the
+    polymerization mechanism is an emergent tetramer property that per-monomer structural
+    features cannot capture.
+  - HBB-Glu26Lys (HbE): model predicted "severe" (conf 0.69); corrected to "mild" — HbE
+    alone is a mild structural variant; severity arises only in compound heterozygosity
+    with beta-thalassemia, which is not modelled here.
+  In both cases tool_comparison.hemoscope_prediction retains the raw classifier output
+  so the mismatch is visible.
+
 To update: re-run notebooks 01-05 in order, then replace backend/data/variants.py with this file.
 """
 
@@ -20,8 +30,8 @@ VARIANT_DB = {
         "position": 6,
         "wildtype_aa": "Glu",
         "mutant_aa": "Val",
-        "severity": "mild",
-        "confidence": 0.8642,
+        "severity": "severe",
+        "confidence": 1.0,
         "sequence_features": {
             "blosum62_score": -2,
             "conservation_score": 0.3154,
@@ -51,8 +61,8 @@ VARIANT_DB = {
             {"state": "Madhya Pradesh", "frequency": 0.11, "source": "ICMR NSCAEM 2023"},
             {"state": "Jharkhand", "frequency": 0.08, "source": "WHO India 2022"}
         ],
-        "plain_language_summary": "This mutation replaces glutamic acid with valine at position 6 of the beta-globin chain. Under low-oxygen conditions, the mutant hemoglobin (HbS) polymerizes into rigid fibres, deforming red blood cells into a sickle shape. These sickled cells block small blood vessels, causing severe pain crises, organ damage, and reduced lifespan. This is the molecular basis of sickle cell disease — one of the most common serious inherited disorders in India.",
-        "clinical_notes": "Homozygous HbSS causes sickle cell disease. Heterozygous HbAS (carrier) is generally asymptomatic. India's National Sickle Cell Elimination Mission targets this variant specifically.",
+        "plain_language_summary": "This mutation replaces glutamic acid with valine at position 6 of the beta-globin chain. Under low-oxygen conditions, the mutant hemoglobin (HbS) polymerizes into rigid fibres, deforming red blood cells into a sickle shape. These sickled cells block small blood vessels, causing severe pain crises, organ damage, and reduced lifespan. This is the molecular basis of sickle cell disease — one of the most common serious inherited disorders in India. Note: the trained classifier predicted 'mild' for this variant (raw confidence 0.86). This is a known error: the pathogenic mechanism depends on HbS tetramer polymerisation under deoxygenation, an emergent property that single-chain AlphaFold2 structural features cannot capture. The severity label has been manually corrected to 'severe' based on established clinical consensus.",
+        "clinical_notes": "Homozygous HbSS causes sickle cell disease (severity: severe — manual curation overrides classifier output of 'mild'). Heterozygous HbAS (carrier) is generally asymptomatic. India's National Sickle Cell Elimination Mission targets this variant specifically.",
         "uniprot_id": "P68871"
     },
     "HBB-Glu26Lys": {
@@ -63,8 +73,8 @@ VARIANT_DB = {
         "position": 26,
         "wildtype_aa": "Glu",
         "mutant_aa": "Lys",
-        "severity": "severe",
-        "confidence": 0.6941,
+        "severity": "mild",
+        "confidence": 1.0,
         "sequence_features": {
             "blosum62_score": 1,
             "conservation_score": 0.346,
@@ -93,8 +103,8 @@ VARIANT_DB = {
             {"state": "Odisha", "frequency": 0.07, "source": "HbVar India entries"},
             {"state": "Manipur", "frequency": 0.14, "source": "Moirangthem et al. 2014"}
         ],
-        "plain_language_summary": "Hemoglobin E is caused by a mutation at position 26 of the beta-globin chain. It is the second most common structural hemoglobin variant worldwide and very common in Northeast India and Southeast Asia. Heterozygous carriers (HbAE) are usually healthy. When inherited together with beta-thalassemia (HbE/beta-thalassemia), it can cause a moderately severe anemia requiring monitoring and sometimes transfusion.",
-        "clinical_notes": "HbE alone is mild. HbE combined with beta-thalassemia (compound heterozygote) results in a clinically significant thalassemia syndrome. Prevalent in Northeast India, West Bengal, and Assam.",
+        "plain_language_summary": "Hemoglobin E is caused by a mutation at position 26 of the beta-globin chain. It is the second most common structural hemoglobin variant worldwide and very common in Northeast India and Southeast Asia. Heterozygous carriers (HbAE) are usually healthy. When inherited together with beta-thalassemia (HbE/beta-thalassemia), it can cause a moderately severe anemia requiring monitoring and sometimes transfusion. Note: the trained classifier predicted 'severe' for this variant (raw confidence 0.69). This is a known error: the buried location and high contact_map_delta (3.71) led the model to overestimate structural disruption, but HbE on its own is a mild variant with no significant oxygen-binding defect. The severity label has been manually corrected to 'mild' based on established clinical consensus.",
+        "clinical_notes": "HbE alone is mild (severity: mild — manual curation overrides classifier output of 'severe'). HbE combined with beta-thalassemia (compound heterozygote) results in a clinically significant thalassemia syndrome. Prevalent in Northeast India, West Bengal, and Assam.",
         "uniprot_id": "P68871"
     },
     "HBB-Lys17Asn": {
@@ -213,8 +223,8 @@ VARIANT_DB = {
             {"state": "Tamil Nadu", "frequency": 0.01, "source": "Case report 2021"},
             {"state": "Karnataka", "frequency": 0.01, "source": "HbVar India entries"}
         ],
-        "plain_language_summary": "This variant at position 98 of beta-globin sits in the heme pocket — the critical oxygen-binding region of the protein. At only 3.1 angstroms from the heme iron, any disruption here directly impairs oxygen binding and release. Despite the methionine substitution appearing conservative by sequence alone (BLOSUM62 score +1), the structural context makes this severely pathogenic. This is an example where sequence-only tools may underestimate severity and structural analysis is critical.",
-        "clinical_notes": "Rare variant with strong structural evidence for pathogenicity. The proximity to heme iron (3.1Å) and high conservation (position entropy 0.05) combined indicate severe impact despite conservative amino acid substitution.",
+        "plain_language_summary": "This variant at position 98 of beta-globin sits in the heme pocket — the critical oxygen-binding region of the protein. At only 6.71 angstroms from the heme iron, any disruption here directly impairs oxygen binding and release. Despite the methionine substitution appearing conservative by sequence alone (BLOSUM62 score +1), the structural context makes this severely pathogenic. This is an example where sequence-only tools may underestimate severity and structural analysis is critical.",
+        "clinical_notes": "Rare variant with strong structural evidence for pathogenicity. The proximity to heme iron (6.71Å) and high conservation (position entropy 0.05) combined indicate severe impact despite conservative amino acid substitution.",
         "uniprot_id": "P68871"
     },
     "HBB-Glu121Gln": {
@@ -421,8 +431,8 @@ VARIANT_DB = {
 }
 
 SEARCH_INDEX = [
-    {"variant_id": "HBB-Glu6Val", "standard_name": "HBB:p.Glu6Val", "common_name": "Sickle Cell (HbS)", "gene": "HBB", "severity": "mild"},
-    {"variant_id": "HBB-Glu26Lys", "standard_name": "HBB:p.Glu26Lys", "common_name": "Hemoglobin E (HbE)", "gene": "HBB", "severity": "severe"},
+    {"variant_id": "HBB-Glu6Val", "standard_name": "HBB:p.Glu6Val", "common_name": "Sickle Cell (HbS)", "gene": "HBB", "severity": "severe"},
+    {"variant_id": "HBB-Glu26Lys", "standard_name": "HBB:p.Glu26Lys", "common_name": "Hemoglobin E (HbE)", "gene": "HBB", "severity": "mild"},
     {"variant_id": "HBB-Lys17Asn", "standard_name": "HBB:p.Lys17Asn", "common_name": None, "gene": "HBB", "severity": "mild"},
     {"variant_id": "HBA1-Asp74His", "standard_name": "HBA1:p.Asp74His", "common_name": "Hemoglobin Q-India", "gene": "HBA1", "severity": "mild"},
     {"variant_id": "HBB-Val98Met", "standard_name": "HBB:p.Val98Met", "common_name": None, "gene": "HBB", "severity": "mild"},

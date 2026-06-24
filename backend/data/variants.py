@@ -9,14 +9,44 @@ Feature pipeline:
   - Trained on 153 ClinVar HBB/HBA1 variants
 
 Known classifier errors (manually corrected in this file):
-  - HBB-Glu6Val (HbS): model predicted "mild" (conf 0.86); corrected to "severe" — the
-    polymerization mechanism is an emergent tetramer property that per-monomer structural
-    features cannot capture.
-  - HBB-Glu26Lys (HbE): model predicted "severe" (conf 0.69); corrected to "mild" — HbE
-    alone is a mild structural variant; severity arises only in compound heterozygosity
-    with beta-thalassemia, which is not modelled here.
-  In both cases tool_comparison.hemoscope_prediction retains the raw classifier output
-  so the mismatch is visible.
+  - HBB-Glu6Val (HbS): the model's full-data fit predicted "mild" (conf 0.86); corrected
+    to "severe" — the polymerization mechanism is an emergent tetramer property that
+    per-monomer structural features cannot capture. This is a genuine model limitation
+    (HbS is not in the 153-variant training set), so tool_comparison.hemoscope_prediction
+    retains the raw classifier output to make the mismatch visible.
+  - HBB-Glu26Lys (HbE): HbE IS one of the 153 training variants. The value originally
+    shown here (severe, conf 0.69) was produced by notebooks/05_generate_variants_py.ipynb
+    scoring HbE with a model that had been fit on the full dataset including HbE's own
+    label — an in-sample, not held-out, prediction. A full audit (see
+    notebooks/06_full_label_audit.ipynb and notebooks/AUDIT_FINDINGS.md) recomputed
+    HbE's prediction using honest 5-fold out-of-fold cross-validation: the model actually
+    predicts "mild" (conf 0.905), which agrees with clinical consensus. tool_comparison
+    now shows this corrected OOF value rather than the leaked one. The earlier narrative
+    attributing this to "structural features fooling the model" was incorrect; the real
+    cause was the scoring leakage compounded by ClinVar's bare "pathogenic" significance
+    call for this variant lacking zygosity/condition context.
+  - HBA1-Asp47His (Hb Hasharon) is also one of the 153 training variants and was affected
+    by the same in-sample scoring issue, though only its confidence value changed (both
+    the leaked and honest OOF predictions are "mild"): tool_comparison.hemoscope_confidence
+    has been updated from the leaked 0.847 to the honest OOF value of 0.490.
+  - The full 153-variant audit additionally found 8 other severity-flip errors, all in
+    HBA1 and none in HBB, and that the entire "mild" training class (106/106 variants)
+    is composed of ClinVar variants of uncertain significance (VUS) rather than confirmed
+    mild calls. See notebooks/AUDIT_FINDINGS.md for full numbers and discussion; these
+    are disclosed as dataset/methodology limitations rather than corrected in this file,
+    since they affect training-set composition, not specific deployed predictions.
+  - HBB-Lys17Asn, HBA1-Ala120Thr, and HBB-Val98Met are NOT in the 153-variant training
+    set (confirmed in notebook 06's match-up against the training data), so their
+    classifier outputs are genuine held-out predictions, not leakage. However, each
+    variant's own descriptive text (written independently) explicitly contradicted its
+    "mild" severity field: HBB-Lys17Asn's and HBA1-Ala120Thr's text both state the
+    variant is clinically benign with no functional consequence; HBB-Val98Met's text
+    states it is "severely pathogenic" given the smallest heme-pocket distance in the
+    whole database (6.71Å). All three severity fields have been corrected to match
+    their own descriptive text (benign, benign, severe respectively); confidence is set
+    to 1.0 for the manual curation, and tool_comparison.hemoscope_prediction/
+    hemoscope_confidence retain the raw "mild" classifier output so the mismatch stays
+    visible.
 
 To update: re-run notebooks 01-05 in order, then replace backend/data/variants.py with this file.
 """
@@ -94,8 +124,8 @@ VARIANT_DB = {
             "sift_prediction": "Deleterious Low Confidence",
             "polyphen_score": None,
             "polyphen_prediction": None,
-            "hemoscope_confidence": 0.6941,
-            "hemoscope_prediction": "severe"
+            "hemoscope_confidence": 0.905,
+            "hemoscope_prediction": "mild"
         },
         "population_data": [
             {"state": "West Bengal", "frequency": 0.11, "source": "Das et al. 2020"},
@@ -103,8 +133,8 @@ VARIANT_DB = {
             {"state": "Odisha", "frequency": 0.07, "source": "HbVar India entries"},
             {"state": "Manipur", "frequency": 0.14, "source": "Moirangthem et al. 2014"}
         ],
-        "plain_language_summary": "Hemoglobin E is caused by a mutation at position 26 of the beta-globin chain. It is the second most common structural hemoglobin variant worldwide and very common in Northeast India and Southeast Asia. Heterozygous carriers (HbAE) are usually healthy. When inherited together with beta-thalassemia (HbE/beta-thalassemia), it can cause a moderately severe anemia requiring monitoring and sometimes transfusion. Note: the trained classifier predicted 'severe' for this variant (raw confidence 0.69). This is a known error: the buried location and high contact_map_delta (3.71) led the model to overestimate structural disruption, but HbE on its own is a mild variant with no significant oxygen-binding defect. The severity label has been manually corrected to 'mild' based on established clinical consensus.",
-        "clinical_notes": "HbE alone is mild (severity: mild — manual curation overrides classifier output of 'severe'). HbE combined with beta-thalassemia (compound heterozygote) results in a clinically significant thalassemia syndrome. Prevalent in Northeast India, West Bengal, and Assam.",
+        "plain_language_summary": "Hemoglobin E is caused by a mutation at position 26 of the beta-globin chain. It is the second most common structural hemoglobin variant worldwide and very common in Northeast India and Southeast Asia. Heterozygous carriers (HbAE) are usually healthy. When inherited together with beta-thalassemia (HbE/beta-thalassemia), it can cause a moderately severe anemia requiring monitoring and sometimes transfusion. Note: HbE is one of the 153 variants used to train the classifier, so its prediction must be evaluated with held-out cross-validation rather than the full-data model fit. Earlier deployments of this app showed a leaked, in-sample prediction of 'severe' (confidence 0.69), produced by scoring HbE with a model that had already been fit on HbE's own label. A corrected, honest out-of-fold evaluation predicts 'mild' (confidence 0.905), which agrees with established clinical consensus and is the value shown here.",
+        "clinical_notes": "HbE alone is mild — this is confirmed both by clinical consensus and by the classifier's honest, leakage-corrected prediction. HbE combined with beta-thalassemia (compound heterozygote) results in a clinically significant thalassemia syndrome. Prevalent in Northeast India, West Bengal, and Assam.",
         "uniprot_id": "P68871"
     },
     "HBB-Lys17Asn": {
@@ -115,8 +145,8 @@ VARIANT_DB = {
         "position": 17,
         "wildtype_aa": "Lys",
         "mutant_aa": "Asn",
-        "severity": "mild",
-        "confidence": 0.8129,
+        "severity": "benign",
+        "confidence": 1.0,
         "sequence_features": {
             "blosum62_score": 0,
             "conservation_score": 0.4256,
@@ -143,8 +173,8 @@ VARIANT_DB = {
             {"state": "Punjab", "frequency": 0.03, "source": "HbVar India entries"},
             {"state": "Gujarat", "frequency": 0.02, "source": "Colah et al. 2010"}
         ],
-        "plain_language_summary": "This variant at position 17 of the beta-globin chain is located on the outer surface of the protein, far from the oxygen-binding heme pocket. The amino acid change is chemically conservative and does not significantly alter the protein's 3D structure or function. This variant is classified as benign — carriers do not develop hemoglobinopathy from this variant alone.",
-        "clinical_notes": "Rare, benign surface variant. No clinical significance as a heterozygote or homozygote. Documented in small numbers in Punjab and Gujarat.",
+        "plain_language_summary": "This variant at position 17 of the beta-globin chain is located on the outer surface of the protein, far from the oxygen-binding heme pocket. The amino acid change is chemically conservative and does not significantly alter the protein's 3D structure or function. This variant is classified as benign — carriers do not develop hemoglobinopathy from this variant alone. Note: the trained classifier's raw output for this variant was 'mild' (confidence 0.81), which contradicted this variant's own clinical description above. The severity label has been manually corrected to 'benign' to match.",
+        "clinical_notes": "Rare, benign surface variant (severity: benign — manual curation overrides classifier output of 'mild'). No clinical significance as a heterozygote or homozygote. Documented in small numbers in Punjab and Gujarat.",
         "uniprot_id": "P68871"
     },
     "HBA1-Asp74His": {
@@ -195,8 +225,8 @@ VARIANT_DB = {
         "position": 98,
         "wildtype_aa": "Val",
         "mutant_aa": "Met",
-        "severity": "mild",
-        "confidence": 0.5818,
+        "severity": "severe",
+        "confidence": 1.0,
         "sequence_features": {
             "blosum62_score": 1,
             "conservation_score": 0.4773,
@@ -223,8 +253,8 @@ VARIANT_DB = {
             {"state": "Tamil Nadu", "frequency": 0.01, "source": "Case report 2021"},
             {"state": "Karnataka", "frequency": 0.01, "source": "HbVar India entries"}
         ],
-        "plain_language_summary": "This variant at position 98 of beta-globin sits in the heme pocket — the critical oxygen-binding region of the protein. At only 6.71 angstroms from the heme iron, any disruption here directly impairs oxygen binding and release. Despite the methionine substitution appearing conservative by sequence alone (BLOSUM62 score +1), the structural context makes this severely pathogenic. This is an example where sequence-only tools may underestimate severity and structural analysis is critical.",
-        "clinical_notes": "Rare variant with strong structural evidence for pathogenicity. The proximity to heme iron (6.71Å) and high conservation (position entropy 0.05) combined indicate severe impact despite conservative amino acid substitution.",
+        "plain_language_summary": "This variant at position 98 of beta-globin sits in the heme pocket — the critical oxygen-binding region of the protein. At only 6.71 angstroms from the heme iron, any disruption here directly impairs oxygen binding and release. Despite the methionine substitution appearing conservative by sequence alone (BLOSUM62 score +1), the structural context makes this severely pathogenic. This is an example where sequence-only tools may underestimate severity and structural analysis is critical. Note: the trained classifier's raw output for this variant was 'mild' (confidence 0.58, the lowest confidence in this database), which contradicted this variant's own clinical description above. The severity label has been manually corrected to 'severe' to match — the 6.71Å heme distance is the closest of any variant in this database.",
+        "clinical_notes": "Rare variant with strong structural evidence for pathogenicity (severity: severe — manual curation overrides classifier output of 'mild'). The proximity to heme iron (6.71Å) and high conservation (position entropy 0.05) combined indicate severe impact despite conservative amino acid substitution.",
         "uniprot_id": "P68871"
     },
     "HBB-Glu121Gln": {
@@ -316,8 +346,8 @@ VARIANT_DB = {
         "position": 120,
         "wildtype_aa": "Ala",
         "mutant_aa": "Thr",
-        "severity": "mild",
-        "confidence": 0.6632,
+        "severity": "benign",
+        "confidence": 1.0,
         "sequence_features": {
             "blosum62_score": 0,
             "conservation_score": 0.5879,
@@ -344,8 +374,8 @@ VARIANT_DB = {
             {"state": "Uttar Pradesh", "frequency": 0.01, "source": "Sukumaran et al. 1972"},
             {"state": "Delhi", "frequency": 0.005, "source": "HbVar India entries"}
         ],
-        "plain_language_summary": "Hemoglobin J-Meerut was first identified in a family from Meerut, Uttar Pradesh in 1972, making it one of the earliest alpha-globin variants described in India. The substitution of threonine for alanine at position 120 of the alpha-globin chain occurs at a surface-exposed residue of the GH helix, distant from both the heme pocket and the alpha-beta subunit contact interface. The change is structurally conservative and does not impair oxygen binding or cooperative function. All known carriers have been clinically asymptomatic.",
-        "clinical_notes": "Benign alpha-globin variant. No hematological or clinical consequences in heterozygotes or homozygotes. Historically significant as one of the first Indian hemoglobin variants to be molecularly characterized.",
+        "plain_language_summary": "Hemoglobin J-Meerut was first identified in a family from Meerut, Uttar Pradesh in 1972, making it one of the earliest alpha-globin variants described in India. The substitution of threonine for alanine at position 120 of the alpha-globin chain occurs at a surface-exposed residue of the GH helix, distant from both the heme pocket and the alpha-beta subunit contact interface. The change is structurally conservative and does not impair oxygen binding or cooperative function. All known carriers have been clinically asymptomatic. Note: the trained classifier's raw output for this variant was 'mild' (confidence 0.66), which contradicted this variant's own clinical description above. The severity label has been manually corrected to 'benign' to match.",
+        "clinical_notes": "Benign alpha-globin variant (severity: benign — manual curation overrides classifier output of 'mild'). No hematological or clinical consequences in heterozygotes or homozygotes. Historically significant as one of the first Indian hemoglobin variants to be molecularly characterized.",
         "uniprot_id": "P69905"
     },
     "HBA1-Asp47His": {
@@ -357,7 +387,7 @@ VARIANT_DB = {
         "wildtype_aa": "Asp",
         "mutant_aa": "His",
         "severity": "mild",
-        "confidence": 0.8468,
+        "confidence": 0.49,
         "sequence_features": {
             "blosum62_score": -1,
             "conservation_score": 0.6303,
@@ -377,7 +407,7 @@ VARIANT_DB = {
             "sift_prediction": None,
             "polyphen_score": None,
             "polyphen_prediction": None,
-            "hemoscope_confidence": 0.8468,
+            "hemoscope_confidence": 0.49,
             "hemoscope_prediction": "mild"
         },
         "population_data": [
@@ -433,12 +463,12 @@ VARIANT_DB = {
 SEARCH_INDEX = [
     {"variant_id": "HBB-Glu6Val", "standard_name": "HBB:p.Glu6Val", "common_name": "Sickle Cell (HbS)", "gene": "HBB", "severity": "severe"},
     {"variant_id": "HBB-Glu26Lys", "standard_name": "HBB:p.Glu26Lys", "common_name": "Hemoglobin E (HbE)", "gene": "HBB", "severity": "mild"},
-    {"variant_id": "HBB-Lys17Asn", "standard_name": "HBB:p.Lys17Asn", "common_name": None, "gene": "HBB", "severity": "mild"},
+    {"variant_id": "HBB-Lys17Asn", "standard_name": "HBB:p.Lys17Asn", "common_name": None, "gene": "HBB", "severity": "benign"},
     {"variant_id": "HBA1-Asp74His", "standard_name": "HBA1:p.Asp74His", "common_name": "Hemoglobin Q-India", "gene": "HBA1", "severity": "mild"},
-    {"variant_id": "HBB-Val98Met", "standard_name": "HBB:p.Val98Met", "common_name": None, "gene": "HBB", "severity": "mild"},
+    {"variant_id": "HBB-Val98Met", "standard_name": "HBB:p.Val98Met", "common_name": None, "gene": "HBB", "severity": "severe"},
     {"variant_id": "HBB-Glu121Gln", "standard_name": "HBB:p.Glu121Gln", "common_name": "Hemoglobin D-Punjab (HbD)", "gene": "HBB", "severity": "benign"},
     {"variant_id": "HBB-Glu121Lys", "standard_name": "HBB:p.Glu121Lys", "common_name": "Hemoglobin O-Arab (HbO)", "gene": "HBB", "severity": "benign"},
-    {"variant_id": "HBA1-Ala120Thr", "standard_name": "HBA1:p.Ala120Thr", "common_name": "Hemoglobin J-Meerut", "gene": "HBA1", "severity": "mild"},
+    {"variant_id": "HBA1-Ala120Thr", "standard_name": "HBA1:p.Ala120Thr", "common_name": "Hemoglobin J-Meerut", "gene": "HBA1", "severity": "benign"},
     {"variant_id": "HBA1-Asp47His", "standard_name": "HBA1:p.Asp47His", "common_name": "Hemoglobin Hasharon", "gene": "HBA1", "severity": "mild"},
     {"variant_id": "HBB-Asn102Thr", "standard_name": "HBB:p.Asn102Thr", "common_name": "Hemoglobin Kansas", "gene": "HBB", "severity": "mild"}
 ]

@@ -5,6 +5,7 @@ import { useVariant } from '../hooks/useVariant'
 import SeverityBadge from '../components/SeverityBadge'
 import StructureViewer from '../components/StructureViewer'
 import PopulationChart from '../components/PopulationChart'
+import IndiaChoropleth from '../components/IndiaChoropleth'
 import ToolComparison from '../components/ToolComparison'
 import ConfidenceBreakdown from '../components/ConfidenceBreakdown'
 
@@ -190,7 +191,10 @@ export default function VariantPage() {
 
             <div className="card p-6">
               <p className="section-label">Indian population frequency</p>
-              <PopulationChart data={d.population_data} />
+              <IndiaChoropleth data={d.population_data} />
+              <div className="mt-5 pt-5 border-t border-zinc-100 dark:border-zinc-800">
+                <PopulationChart data={d.population_data} />
+              </div>
             </div>
           </div>
 

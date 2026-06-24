@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@svg-maps/india": "^2.0.0",
     "3dmol": "^2.4.0",
     "axios": "^1.7.2",
     "framer-motion": "^11.2.10",

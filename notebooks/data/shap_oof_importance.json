@@ -1,0 +1,68 @@
+{
+  "method": "TreeExplainer SHAP values computed per-fold on a RandomForestClassifier fit only on that folds training rows, then evaluated on that folds held-out rows (5-fold StratifiedKFold, same split as notebook 04/06). No SHAP value in this file was computed by a model that had seen its own row during training.",
+  "feature_importance_mean_abs_shap": [
+    {
+      "feature": "heme_distance_angstrom",
+      "mean_abs_shap_overall": 0.05979013409126042,
+      "mean_abs_shap_benign": 0.06319045756466583,
+      "mean_abs_shap_mild": 0.0751049509782889,
+      "mean_abs_shap_severe": 0.041074993730826515
+    },
+    {
+      "feature": "conservation_score",
+      "mean_abs_shap_overall": 0.058308940764305726,
+      "mean_abs_shap_benign": 0.05040472092266341,
+      "mean_abs_shap_mild": 0.06845557488775922,
+      "mean_abs_shap_severe": 0.05606652648249454
+    },
+    {
+      "feature": "position_entropy",
+      "mean_abs_shap_overall": 0.05511253131751052,
+      "mean_abs_shap_benign": 0.055580785254017245,
+      "mean_abs_shap_mild": 0.06593565357469952,
+      "mean_abs_shap_severe": 0.0438211551238148
+    },
+    {
+      "feature": "pssm_score",
+      "mean_abs_shap_overall": 0.04704159239849329,
+      "mean_abs_shap_benign": 0.03855182341171673,
+      "mean_abs_shap_mild": 0.06085115332466054,
+      "mean_abs_shap_severe": 0.041721800459102586
+    },
+    {
+      "feature": "af2_confidence",
+      "mean_abs_shap_overall": 0.0430309914185151,
+      "mean_abs_shap_benign": 0.024501326918279963,
+      "mean_abs_shap_mild": 0.05232977799311863,
+      "mean_abs_shap_severe": 0.05226186934414672
+    },
+    {
+      "feature": "blosum62_score",
+      "mean_abs_shap_overall": 0.03812497515334234,
+      "mean_abs_shap_benign": 0.02766353126293747,
+      "mean_abs_shap_mild": 0.049524872760492694,
+      "mean_abs_shap_severe": 0.03718652143659685
+    },
+    {
+      "feature": "contact_count_wt",
+      "mean_abs_shap_overall": 0.032902458760335186,
+      "mean_abs_shap_benign": 0.03521151076456815,
+      "mean_abs_shap_mild": 0.041412694127934115,
+      "mean_abs_shap_severe": 0.022083171388503284
+    },
+    {
+      "feature": "burial_binary",
+      "mean_abs_shap_overall": 0.010225295816711515,
+      "mean_abs_shap_benign": 0.01127316541677459,
+      "mean_abs_shap_mild": 0.012089278844915011,
+      "mean_abs_shap_severe": 0.007313443188444942
+    },
+    {
+      "feature": "is_interface_residue",
+      "mean_abs_shap_overall": 0.002690163094799159,
+      "mean_abs_shap_benign": 0.0023227115891099846,
+      "mean_abs_shap_mild": 0.0035606146655704396,
+      "mean_abs_shap_severe": 0.002187163029717054
+    }
+  ]
+}
